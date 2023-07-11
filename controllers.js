@@ -1,11 +1,12 @@
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import faker from "faker";
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const { fakerDE: faker } = require("@faker-js/faker");
+const { v4: uuidv4 } = require("uuid");
 
 class UserController {
-  constructor() {
+  constructor(db) {
     this.SALT_ROUNDS = 10;
-    this.db = null;
+    this.db = db;
   }
 
   async login(req, res) {
@@ -142,9 +143,9 @@ class UserController {
       );
 
     await this.db.collection("sold_vehicles").insertOne({
-      vehicle_id: faker.random.uuid(),
+      vehicle_id: await uuidv4(),
       car_id: deal.car_id,
-      vehicle_info: {}, 
+      vehicle_info: {},
     });
 
     res.status(200).json({ message: "Car purchased successfully" });
@@ -152,8 +153,8 @@ class UserController {
 }
 
 class DealershipController {
-  constructor() {
-    this.db = null; 
+  constructor(db) {
+    this.db = db;
   }
 
   async getAllCars(req, res) {
@@ -253,7 +254,7 @@ class DealershipController {
       return res.status(404).json({ message: "Car not found" });
     }
 
-    const dealId = faker.random.uuid();
+    const dealId = await uuidv4();
     await this.db.collection("deal").insertOne({
       deal_id: dealId,
       car_id: carId,
@@ -301,7 +302,7 @@ class DealershipController {
       return res.status(404).json({ message: "Car not found" });
     }
 
-    const vehicleId = faker.random.uuid();
+    const vehicleId = await uuidv4();
     await this.db.collection("sold_vehicles").insertOne({
       vehicle_id: vehicleId,
       car_id: carId,
@@ -319,4 +320,7 @@ class DealershipController {
   }
 }
 
-export { UserController, DealershipController };
+module.exports = {
+  UserController,
+  DealershipController,
+};
